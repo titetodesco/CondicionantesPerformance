@@ -7,6 +7,3 @@ unidecode
 rapidfuzz
 spacy
 openpyxl
-import sys
-print(sys.executable)
-!pip list
