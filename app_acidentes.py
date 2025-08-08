@@ -1,14 +1,3 @@
-import sys, plotly
-import plotly.express as px
-import streamlit as st
-
-st.write("Python:", sys.executable)
-st.write("plotly version:", plotly.__version__)
-st.write("plotly file:", plotly.__file__)
-st.write("px file:", px.__file__)
-
-
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
