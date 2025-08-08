@@ -9,10 +9,6 @@ import os
 import tempfile
 import spacy
 
-import sys
-print(sys.executable)
-!pip list
-
 # Carrega modelo spaCy (Português)
 try:
     nlp = spacy.load("pt_core_news_sm")
