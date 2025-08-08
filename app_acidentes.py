@@ -11,7 +11,7 @@ import spacy
 
 import sys
 print(sys.executable)
-pip list
+!pip list
 
 # Carrega modelo spaCy (Português)
 try:
