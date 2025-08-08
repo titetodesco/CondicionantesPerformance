@@ -21,6 +21,7 @@ st.title("🛠️ Análise de Acidentes – Versão GitHub")
 
 # Caminho fixo da planilha no repositório
 TAXONOMIA_PATH = "TaxonomiaCP_Por.xlsx"
+TAXONOMIA_PATH = "https://raw.githubusercontent.com/titetodesco/CondicionantesPerformance/main/TaxonomiaCP_Por.xlsx"
 
 # Sidebar – upload do relatório
 st.sidebar.header("📂 Upload do Relatório de Acidente")
