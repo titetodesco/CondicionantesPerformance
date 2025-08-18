@@ -145,7 +145,9 @@ if file_relato:
 
             # Converte para Excel em memória
             output = io.BytesIO()
-            with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+            # Use openpyxl as the engine since it is already a dependency. XlsxWriter
+            # requires a separate install and isn't available in this environment.
+            with pd.ExcelWriter(output, engine="openpyxl") as writer:
                 export_df.to_excel(writer, index=False, sheet_name="Fatores")
             excel_data = output.getvalue()
 
