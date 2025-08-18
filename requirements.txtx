@@ -1,9 +1,10 @@
-plotly==5.24.1
 streamlit
 pandas
+plotly>=5.24.0
 PyMuPDF
 python-docx
 unidecode
 rapidfuzz
-spacy
+spacy>=3.7
 openpyxl
+https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.7.0/pt_core_news_sm-3.7.0.tar.gz
