@@ -133,10 +133,17 @@ if file_relato:
 
         # Exportar resultados para planilha Excel
         elif aba == "📥 Exportar Planilha":
-            # Agrupa pelas colunas de interesse e conta as ocorrências
+            # Copiamos o DataFrame para não alterar o original
+            df_tmp = resultados.copy()
+        
+            # Substitui NaN por string vazia nas chaves de agrupamento
+            df_tmp["Subfator 1"] = df_tmp["Subfator 1"].fillna("")
+            df_tmp["Subfator 2"] = df_tmp["Subfator 2"].fillna("")
+        
+            # Agrupa e conta, agora sem perder linhas que têm subfatores vazios
             export_df = (
-                resultados
-                .groupby(["Dimensão", "Fatores", "Subfator 1", "Subfator 2"])
+                df_tmp
+                .groupby(["Dimensão", "Fatores", "Subfator 1", "Subfator 2"], dropna=False)
                 .size()
                 .reset_index(name="Frequência")
             )
@@ -144,7 +151,7 @@ if file_relato:
             st.subheader("📄 Dados para Exportação")
             st.dataframe(export_df)
         
-            # Gera o Excel em memória (usa openpyxl, que já está instalado)
+            # Gera o Excel com openpyxl
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine="openpyxl") as writer:
                 export_df.to_excel(writer, index=False, sheet_name="Fatores")
@@ -156,6 +163,7 @@ if file_relato:
                 file_name="fatores_encontrados.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
 
 
 else:
