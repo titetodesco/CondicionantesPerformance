@@ -133,30 +133,30 @@ if file_relato:
 
         # Exportar resultados para planilha Excel
         elif aba == "📥 Exportar Planilha":
-            export_df = resultados[[
-                "Dimensão",
-                "Fatores",
-                "Subfator 1",
-                "Subfator 2"
-            ]].drop_duplicates()
-
+            # Agrupa pelas colunas de interesse e conta as ocorrências
+            export_df = (
+                resultados
+                .groupby(["Dimensão", "Fatores", "Subfator 1", "Subfator 2"])
+                .size()
+                .reset_index(name="Frequência")
+            )
+        
             st.subheader("📄 Dados para Exportação")
             st.dataframe(export_df)
-
-            # Converte para Excel em memória
+        
+            # Gera o Excel em memória (usa openpyxl, que já está instalado)
             output = io.BytesIO()
-            # Use openpyxl as the engine since it is already a dependency. XlsxWriter
-            # requires a separate install and isn't available in this environment.
             with pd.ExcelWriter(output, engine="openpyxl") as writer:
                 export_df.to_excel(writer, index=False, sheet_name="Fatores")
             excel_data = output.getvalue()
-
+        
             st.download_button(
                 label="💾 Baixar planilha",
                 data=excel_data,
                 file_name="fatores_encontrados.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+
 
 else:
     st.info("📤 Faça upload de um relatório para iniciar.")
