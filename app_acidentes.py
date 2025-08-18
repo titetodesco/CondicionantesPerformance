@@ -9,12 +9,13 @@ import os
 import tempfile
 import io  # For exporting DataFrame to Excel
 
-# Defina a sua senha secreta aqui (não utilizado no momento)
-PASSWORD = "cdshell"  # Troque por uma senha forte se for implementar autenticação
 
 # Configura a página
 st.set_page_config(layout="wide")
 st.title("🛠️ Análise de Acidentes – Versão GitHub")
+
+# Defina a sua senha secreta aqui (não utilizado no momento)
+PASSWORD = "cdshell"  # Troque por uma senha forte se for implementar autenticação
 
 # Caminho fixo da planilha no repositório
 TAXONOMIA_PATH = "TaxonomiaCP_Por.xlsx"
