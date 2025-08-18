@@ -7,16 +7,17 @@ from docx import Document
 from unidecode import unidecode
 import os
 import tempfile
+import io  # For exporting DataFrame to Excel
 
-# Defina a sua senha secreta aqui
-PASSWORD = "cdshell"  # Troque por uma senha forte
+# Defina a sua senha secreta aqui (não utilizado no momento)
+PASSWORD = "cdshell"  # Troque por uma senha forte se for implementar autenticação
 
+# Configura a página
 st.set_page_config(layout="wide")
 st.title("🛠️ Análise de Acidentes – Versão GitHub")
 
 # Caminho fixo da planilha no repositório
 TAXONOMIA_PATH = "TaxonomiaCP_Por.xlsx"
-#TAXONOMIA_PATH = "https://raw.githubusercontent.com/titetodesco/CondicionantesPerformance/main/TaxonomiaCP_Por.xlsx"
 
 # Sidebar – upload do relatório
 st.sidebar.header("📂 Upload do Relatório de Acidente")
@@ -25,7 +26,7 @@ file_relato = st.sidebar.file_uploader(
     type=["pdf", "docx", "txt"]
 )
 
-# Função para extrair texto
+# Função para extrair texto do arquivo enviado pelo usuário
 def extract_text(file):
     suffix = os.path.splitext(file.name)[1]
     with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
@@ -46,7 +47,7 @@ def extract_text(file):
 
     return unidecode(text.lower())
 
-# Função para detectar fatores
+# Função para detectar fatores e subfatores usando o DataFrame de referência
 def detectar_fatores(texto, df, coluna_termos):
     resultados = []
     for _, row in df.iterrows():
@@ -65,29 +66,29 @@ def detectar_fatores(texto, df, coluna_termos):
                 })
     return pd.DataFrame(resultados)
 
-# Fluxo principal
+# Fluxo principal da aplicação
 if file_relato:
-    # Carrega texto do relatório
+    # Extrai o texto do relatório
     texto = extract_text(file_relato)
 
-    # Carrega planilha fixa
+    # Carrega a planilha fixa de referencia
     if not os.path.exists(TAXONOMIA_PATH):
         st.error(f"Planilha {TAXONOMIA_PATH} não encontrada no repositório.")
         st.stop()
 
     df_cp = pd.read_excel(TAXONOMIA_PATH)
 
-    # Detecta idioma
+    # Detecta idioma do relatório usando palavras-chave simples
     idioma = "pt" if any(p in texto for p in ["segurança", "procedimento", "acidente", "falha", "trabalho"]) else "en"
     coluna_termos = "Bag de termos" if idioma == "pt" else "Bag of terms"
     st.info(f"🌍 Idioma detectado: {'Português' if idioma == 'pt' else 'Inglês'} – usando `{coluna_termos}`")
 
-    # Prepara termos
+    # Prepara a coluna de termos para a busca (lista de termos)
     df_cp[coluna_termos] = df_cp[coluna_termos].fillna("").apply(
         lambda x: [t.strip().lower() for t in str(x).split(";") if t.strip()]
     )
 
-    # Detecta fatores
+    # Detecta fatores no texto
     resultados = detectar_fatores(texto, df_cp, coluna_termos)
 
     if resultados.empty:
@@ -95,24 +96,65 @@ if file_relato:
     else:
         st.success("✅ Termos identificados!")
 
+        # Menu com opções de visualização e exportação
         aba = st.selectbox(
             "Escolha a visualização:",
-            ["📌 Resumo por Fator", "📊 Gráficos", "🧠 Recomendações"]
+            [
+                "📌 Resumo por Fator",
+                "📊 Gráficos",
+                "🧠 Recomendações",
+                "📥 Exportar Planilha"
+            ]
         )
 
+        # Resumo por fator/dimensão
         if aba == "📌 Resumo por Fator":
             resumo_dimensao = resultados["Dimensão"].value_counts().reset_index()
             resumo_dimensao.columns = ["Dimensão", "Frequência"]
             st.dataframe(resumo_dimensao)
 
+        # Gráficos interativos
         elif aba == "📊 Gráficos":
-            fig1 = px.histogram(resultados, y="Dimensão", color="Dimensão", title="Frequência por Dimensão", text_auto=True)
+            fig1 = px.histogram(
+                resultados,
+                y="Dimensão",
+                color="Dimensão",
+                title="Frequência por Dimensão",
+                text_auto=True
+            )
             st.plotly_chart(fig1, use_container_width=True)
 
+        # Recomendações agrupadas por dimensão e fator
         elif aba == "🧠 Recomendações":
             df_rec = resultados.groupby(
                 ["Dimensão", "Fatores", "Recomendação 1", "Recomendação 2"]
             ).size().reset_index(name="Frequência")
             st.dataframe(df_rec)
+
+        # Exportar resultados para planilha Excel
+        elif aba == "📥 Exportar Planilha":
+            export_df = resultados[[
+                "Dimensão",
+                "Fatores",
+                "Subfator 1",
+                "Subfator 2"
+            ]].drop_duplicates()
+
+            st.subheader("📄 Dados para Exportação")
+            st.dataframe(export_df)
+
+            # Converte para Excel em memória
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+                export_df.to_excel(writer, index=False, sheet_name="Fatores")
+            excel_data = output.getvalue()
+
+            st.download_button(
+                label="💾 Baixar planilha",
+                data=excel_data,
+                file_name="fatores_encontrados.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+
 else:
     st.info("📤 Faça upload de um relatório para iniciar.")
