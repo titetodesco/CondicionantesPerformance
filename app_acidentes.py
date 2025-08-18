@@ -7,15 +7,6 @@ from docx import Document
 from unidecode import unidecode
 import os
 import tempfile
-import spacy
-
-
-# Carrega modelo spaCy (Português)
-try:
-    nlp = spacy.load("pt_core_news_sm")
-except:
-    st.error("⚠ Modelo spaCy 'pt_core_news_sm' não encontrado. Instale com: python -m spacy download pt_core_news_sm")
-    st.stop()
 
 st.set_page_config(layout="wide")
 st.title("🛠️ Análise de Acidentes – Versão GitHub")
