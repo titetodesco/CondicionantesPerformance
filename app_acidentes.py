@@ -8,6 +8,9 @@ from unidecode import unidecode
 import os
 import tempfile
 
+# Defina a sua senha secreta aqui
+PASSWORD = "cdshell"  # Troque por uma senha forte
+
 st.set_page_config(layout="wide")
 st.title("🛠️ Análise de Acidentes – Versão GitHub")
 
