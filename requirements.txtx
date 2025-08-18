@@ -1,6 +1,6 @@
 streamlit
 pandas
-plotly>=5.22.0
+plotly==5.24.1
 PyMuPDF
 python-docx
 unidecode
