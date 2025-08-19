@@ -125,6 +125,26 @@ if file_relato:
             )
             st.plotly_chart(fig1, use_container_width=True)
 
+        elif aba == "🌳 Hierarquia de Condicionantes":
+            # Prepara dados de hierarquia com frequências, incluindo linhas sem subfatores
+            df_tmp = resultados.copy()
+            df_tmp["Subfator 1"] = df_tmp["Subfator 1"].fillna("")
+            df_tmp["Subfator 2"] = df_tmp["Subfator 2"].fillna("")
+            grouped_df = (
+                df_tmp
+                .groupby(["Dimensão", "Fatores", "Subfator 1", "Subfator 2"], dropna=False)
+                .size()
+                .reset_index(name="Frequência")
+            )
+
+            fig_hier = px.treemap(
+                grouped_df,
+                path=["Dimensão", "Fatores", "Subfator 1", "Subfator 2"],
+                values="Frequência",
+                title="Hierarquia de Condicionantes por Dimensão",
+            )
+            st.plotly_chart(fig_hier, use_container_width=True)
+        
         # Recomendações agrupadas por dimensão e fator
         elif aba == "🧠 Recomendações":
             df_rec = resultados.groupby(
